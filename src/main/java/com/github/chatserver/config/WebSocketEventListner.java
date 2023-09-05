@@ -30,6 +30,7 @@ public class WebSocketEventListner {
         String userName = (String) headerAccessor.getSessionAttributes().get("userName");
         Long userId = (Long) headerAccessor.getSessionAttributes().get("userId");
         Long sellerId = (Long) headerAccessor.getSessionAttributes().get("sellerId");
+        Long productId = (Long) headerAccessor.getSessionAttributes().get("productId");
         String customRoomId = (String) headerAccessor.getSessionAttributes().get("customRoomId");
 
         if (chatName != null) {
@@ -40,7 +41,7 @@ public class WebSocketEventListner {
                         .type(MessageType.LEAVE)
                         .chatName(chatName)
                         .build();
-                messageTemplate.convertAndSend("/topic/" + sellerId + "/" + userId, chatMessage);
+                messageTemplate.convertAndSend("/topic/" + sellerId + "/" + productId + "/" + userId, chatMessage);
             } else if (chatName.equals(userName)) {
                 chatRoomService.userLeft(customRoomId, userId);
                 log.info("User disconnected {}", chatName);
@@ -48,7 +49,7 @@ public class WebSocketEventListner {
                         .type(MessageType.LEAVE)
                         .chatName(chatName)
                         .build();
-                messageTemplate.convertAndSend("/topic/" + sellerId + "/" + userId, chatMessage);
+                messageTemplate.convertAndSend("/topic/" + sellerId + "/" + productId + "/" + userId, chatMessage);
             }
         }
 
@@ -58,7 +59,7 @@ public class WebSocketEventListner {
                     .type(MessageType.TERMINATE)
                     .chatName(chatName)
                     .build();
-            messageTemplate.convertAndSend("/topic/" + sellerId + "/" + userId, chatMessage);
+            messageTemplate.convertAndSend("/topic/" + sellerId + "/" + productId + "/" + userId, chatMessage);
 
         }
     }

@@ -43,7 +43,7 @@ function connect(event) {
 }
 
 
-async function onConnected() {
+function onConnected() {
     const message = {
         shopName: seller.shopName,
         userName: user.userName,
@@ -52,7 +52,7 @@ async function onConnected() {
     }
 
     // Subscribe to the Public Topic
-    await stompClient.subscribe(`/topic/${seller.sellerId}/${product.productId}/${user.userId}`, onMessageReceived);
+    stompClient.subscribe(`/topic/${seller.sellerId}/${product.productId}/${user.userId}`, onMessageReceived);
 
     // Tell your username to the server
     stompClient.send(`/app/chat.addUser/${seller.sellerId}/${product.productId}/${user.userId}`,
@@ -88,36 +88,12 @@ function sendMessage(event) {
 function onMessageReceived(payload) {
     const message = JSON.parse(payload.body);
     const messageElement = document.createElement('li');
-    // if (message.type === 'JOIN') {
-    //     messageElement.classList.add('event-message');
-    //     message.content = message.chatName + ' joined!';
-    //     console.log("11111111111", message.content)
-    // } else if (message.type === 'LEAVE') {
-    //     messageElement.classList.add('event-message');
-    //     message.content = message.chatName + ' left!';
-    // } else if (message.type === 'TERMINATE') {
-    //     disconnectChatRoom();
-    // } else {
-    //     messageElement.classList.add('chat-message');
-    //     var avatarElement = document.createElement('i');
-    //     var avatarText = document.createTextNode(message.sender[0]);
-    //     avatarElement.appendChild(avatarText);
-    //     avatarElement.style['background-color'] = getAvatarColor(message.sender);
-    //
-    //     messageElement.appendChild(avatarElement);
-    //
-    //     var usernameElement = document.createElement('span');
-    //     var usernameText = document.createTextNode(message.sender);
-    //     usernameElement.appendChild(usernameText);
-    //     messageElement.appendChild(usernameElement);
-    // }
 
     switch (message.type){
         case 'JOIN':
             messageElement.classList.add('event-message');
             message.content = message.chatName + ' joined!';
             break;
-
 
         case 'LEAVE':
             messageElement.classList.add('event-message');

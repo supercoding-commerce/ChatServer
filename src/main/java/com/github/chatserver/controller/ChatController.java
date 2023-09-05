@@ -11,10 +11,11 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Objects;
 
-@Controller
+@RestController
 @Slf4j
 @RequiredArgsConstructor
 public class ChatController {
@@ -46,6 +47,7 @@ public class ChatController {
         headerAccessor.getSessionAttributes().put("shopName", enterChatDto.getShopName());
         headerAccessor.getSessionAttributes().put("sellerId", sellerId);
         headerAccessor.getSessionAttributes().put("chatName", enterChatDto.getChatName());
+        headerAccessor.getSessionAttributes().put("productId", productId);
         String customRoomId = createCustomRoomId(sellerId, productId, userId);
         headerAccessor.getSessionAttributes().put("customRoomId", customRoomId);
         System.out.println(customRoomId);
