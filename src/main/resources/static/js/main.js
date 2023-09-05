@@ -1,21 +1,21 @@
 
-const seller = {sellerId: 1, shopName: "testShop"}
-const user = {userId: 2, userName: "testUser"}
-const product = {productId: 1, productName: "testProduct"}
+const seller = {sellerId: 1, shopName: "테스트판매자"}
+const user = {userId: 2, userName: "테스트유저"}
+const product = {productId: 1, productName: "테스트상품"}
 
-var usernamePage = document.querySelector('#username-page');
-var chatPage = document.querySelector('#chat-page');
-var startButton = document.querySelector('#open-chat');
-var messageForm = document.querySelector('#messageForm');
-var messageInput = document.querySelector('#message');
-var messageArea = document.querySelector('#messageArea');
-var connectingElement = document.querySelector('.connecting');
-var sellerRadio = document.querySelector('#seller-radio'); // 추가: 판매자 라디오 버튼 요소
-var userRadio = document.querySelector('#user-radio');
-var stompClient = null;
-var chatName = null;
+const usernamePage = document.querySelector('#username-page');
+const chatPage = document.querySelector('#chat-page');
+const startButton = document.querySelector('#open-chat');
+const messageForm = document.querySelector('#messageForm');
+const messageInput = document.querySelector('#message');
+const messageArea = document.querySelector('#messageArea');
+const connectingElement = document.querySelector('.connecting');
+const sellerRadio = document.querySelector('#seller-radio'); // 추가: 판매자 라디오 버튼 요소
+const userRadio = document.querySelector('#user-radio');
+let stompClient = null;
+let chatName = null;
 
-var colors = [
+const colors = [
     '#2196F3', '#32c787', '#00BCD4', '#ff5652',
     '#ffc107', '#ff85af', '#FF9800', '#39bbb0'
 ];
@@ -33,7 +33,11 @@ function connect(event) {
     usernamePage.classList.add('hidden');
     chatPage.classList.remove('hidden');
 
-
+    /**
+     * SockJS와 StompJS 연결부분
+     * SockJS : 웹 소켓을 사용한 실시간 통신의 폴백(fallback)을 제공하는 JavaScript 라이브러리입니다. 주요 목적은 브라우저에서 웹 소켓을 지원하지 않는 경우에도 실시간 통신을 가능하게 하는 것입니다.
+     * STOMP(Simple Text Oriented Messaging Protocol): 사실상 요놈이 본체 같습니다. 간단한 텍스트 기반의 메시징 프로토콜로, 메시지 브로커와 클라이언트 간의 통신을 단순화하는 데 사용됩니다. 주로 웹 소켓과 함께 사용되며, 메시지 큐, 채팅 애플리케이션, 실시간 업데이트 등의 시나리오에 적합합니다.
+     */
     const socket = new SockJS('/ws');
     stompClient = Stomp.over(socket);
 
@@ -71,9 +75,9 @@ function onError(error) {
 
 
 function sendMessage(event) {
-    var messageContent = messageInput.value.trim();
+    const messageContent = messageInput.value.trim();
     if(messageContent && stompClient) {
-        var chatMessage = {
+        const chatMessage = {
             sender: chatName,
             content: messageInput.value,
             type: 'CHAT'
@@ -106,22 +110,22 @@ function onMessageReceived(payload) {
 
         default :
             messageElement.classList.add('chat-message');
-            var avatarElement = document.createElement('i');
-            var avatarText = document.createTextNode(message.sender[0]);
+            const avatarElement = document.createElement('i');
+            const avatarText = document.createTextNode(message.sender[0]);
             avatarElement.appendChild(avatarText);
             avatarElement.style['background-color'] = getAvatarColor(message.sender);
 
             messageElement.appendChild(avatarElement);
 
-            var usernameElement = document.createElement('span');
-            var usernameText = document.createTextNode(message.sender);
+            const usernameElement = document.createElement('span');
+            const usernameText = document.createTextNode(message.sender);
             usernameElement.appendChild(usernameText);
             messageElement.appendChild(usernameElement);
     }
 
 
-    var textElement = document.createElement('p');
-    var messageText = document.createTextNode(message.content);
+    const textElement = document.createElement('p');
+    const messageText = document.createTextNode(message.content);
     textElement.appendChild(messageText);
 
     messageElement.appendChild(textElement);
@@ -141,11 +145,11 @@ function disconnectChatRoom() {
 
 
 function getAvatarColor(messageSender) {
-    var hash = 0;
-    for (var i = 0; i < messageSender.length; i++) {
+    let hash = 0;
+    for (let i = 0; i < messageSender.length; i++) {
         hash = 31 * hash + messageSender.charCodeAt(i);
     }
-    var index = Math.abs(hash % colors.length);
+    let index = Math.abs(hash % colors.length);
     return colors[index];
 }
 

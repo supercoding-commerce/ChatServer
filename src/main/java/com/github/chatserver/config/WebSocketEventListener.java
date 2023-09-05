@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.messaging.simp.user.SimpUser;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
@@ -15,16 +16,20 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class WebSocketEventListner {
-
+public class WebSocketEventListener {
+    private final SimpUserRegistry userRegistry;
     private final SimpMessageSendingOperations messageTemplate;
     private final ChatRoomService chatRoomService;
 
     @EventListener
-    public void handleWebSocketDisconnectListner(
+    public void handleWebSocketDisconnectListener(
             SessionDisconnectEvent event
     ) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
+        String sessionId = headerAccessor.getSessionId();
+        SimpUser user = userRegistry.getUser(sessionId);
+
+
         String chatName = (String) headerAccessor.getSessionAttributes().get("chatName");
         String shopName = (String) headerAccessor.getSessionAttributes().get("shopName");
         String userName = (String) headerAccessor.getSessionAttributes().get("userName");

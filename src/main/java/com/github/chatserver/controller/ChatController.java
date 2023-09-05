@@ -41,7 +41,6 @@ public class ChatController {
             @DestinationVariable Long userId,
             SimpMessageHeaderAccessor headerAccessor
     ) {
-        // 웹소켓 세션에 유저이름 넣기
         headerAccessor.getSessionAttributes().put("userName", enterChatDto.getUserName());
         headerAccessor.getSessionAttributes().put("userId", userId);
         headerAccessor.getSessionAttributes().put("shopName", enterChatDto.getShopName());
