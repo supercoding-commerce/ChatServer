@@ -12,6 +12,8 @@ const messageArea = document.querySelector('#messageArea');
 const connectingElement = document.querySelector('.connecting');
 const sellerRadio = document.querySelector('#seller-radio'); // 추가: 판매자 라디오 버튼 요소
 const userRadio = document.querySelector('#user-radio');
+
+
 let stompClient = null;
 let chatName = null;
 
@@ -40,8 +42,7 @@ function connect(event) {
      */
     const socket = new SockJS('/ws');
     stompClient = Stomp.over(socket);
-
-        stompClient.connect({}, onConnected, onError);
+    stompClient.connect({}, onConnected, onError);
 
     event.preventDefault();
 }
@@ -51,7 +52,7 @@ function onConnected() {
     const message = {
         shopName: seller.shopName,
         userName: user.userName,
-        chatName: chatName,
+        chatName: chatName, //웹소켓 세션 연결이 브라우저마다 각자 독립적으로 메모리를 다루기 때문에 //role : seller or user
         type: "JOIN"
     }
 
