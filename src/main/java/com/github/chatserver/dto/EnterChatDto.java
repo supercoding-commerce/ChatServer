@@ -10,5 +10,6 @@ import lombok.*;
 public class EnterChatDto {
     private String shopName;
     private String userName;
+    private String chatName;
     private MessageType type;
 }

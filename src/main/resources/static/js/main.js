@@ -1,6 +1,7 @@
 
 const seller = {sellerId: 1, shopName: "testShop"}
 const user = {userId: 2, userName: "testUser"}
+const product = {productId: 1, productName: "testProduct"}
 
 var usernamePage = document.querySelector('#username-page');
 var chatPage = document.querySelector('#chat-page');
@@ -42,18 +43,19 @@ function connect(event) {
 }
 
 
-function onConnected() {
+async function onConnected() {
     const message = {
         shopName: seller.shopName,
         userName: user.userName,
+        chatName: chatName,
         type: "JOIN"
     }
 
     // Subscribe to the Public Topic
-    stompClient.subscribe(`/topic/${seller.sellerId}/${user.userId}`, onMessageReceived);
+    await stompClient.subscribe(`/topic/${seller.sellerId}/${product.productId}/${user.userId}`, onMessageReceived);
 
     // Tell your username to the server
-    stompClient.send(`/app/chat.addUser/${seller.sellerId}/${user.userId}`,
+    stompClient.send(`/app/chat.addUser/${seller.sellerId}/${product.productId}/${user.userId}`,
         {},
         JSON.stringify(message)
     )
@@ -76,7 +78,7 @@ function sendMessage(event) {
             content: messageInput.value,
             type: 'CHAT'
         };
-        stompClient.send(`/app/chat.sendMessage/${seller.sellerId}/${user.userId}`, {}, JSON.stringify(chatMessage));
+        stompClient.send(`/app/chat.sendMessage/${seller.sellerId}/${product.productId}/${user.userId}`, {}, JSON.stringify(chatMessage));
         messageInput.value = '';
     }
     event.preventDefault();
@@ -84,31 +86,63 @@ function sendMessage(event) {
 
 
 function onMessageReceived(payload) {
-    var message = JSON.parse(payload.body);
+    const message = JSON.parse(payload.body);
+    const messageElement = document.createElement('li');
+    // if (message.type === 'JOIN') {
+    //     messageElement.classList.add('event-message');
+    //     message.content = message.chatName + ' joined!';
+    //     console.log("11111111111", message.content)
+    // } else if (message.type === 'LEAVE') {
+    //     messageElement.classList.add('event-message');
+    //     message.content = message.chatName + ' left!';
+    // } else if (message.type === 'TERMINATE') {
+    //     disconnectChatRoom();
+    // } else {
+    //     messageElement.classList.add('chat-message');
+    //     var avatarElement = document.createElement('i');
+    //     var avatarText = document.createTextNode(message.sender[0]);
+    //     avatarElement.appendChild(avatarText);
+    //     avatarElement.style['background-color'] = getAvatarColor(message.sender);
+    //
+    //     messageElement.appendChild(avatarElement);
+    //
+    //     var usernameElement = document.createElement('span');
+    //     var usernameText = document.createTextNode(message.sender);
+    //     usernameElement.appendChild(usernameText);
+    //     messageElement.appendChild(usernameElement);
+    // }
 
-    var messageElement = document.createElement('li');
+    switch (message.type){
+        case 'JOIN':
+            messageElement.classList.add('event-message');
+            message.content = message.chatName + ' joined!';
+            break;
 
-    if(message.type === 'JOIN') {
-        messageElement.classList.add('event-message');
-        message.content = chatName + ' joined!';
-    } else if (message.type === 'LEAVE') {
-        messageElement.classList.add('event-message');
-        message.content = chatName + ' left!';
-    } else {
-        messageElement.classList.add('chat-message');
 
-        var avatarElement = document.createElement('i');
-        var avatarText = document.createTextNode(message.sender[0]);
-        avatarElement.appendChild(avatarText);
-        avatarElement.style['background-color'] = getAvatarColor(message.sender);
+        case 'LEAVE':
+            messageElement.classList.add('event-message');
+            message.content = message.chatName + ' left!';
+            break;
 
-        messageElement.appendChild(avatarElement);
+        case 'TERMINATE':
+            disconnectChatRoom();
+            break;
 
-        var usernameElement = document.createElement('span');
-        var usernameText = document.createTextNode(message.sender);
-        usernameElement.appendChild(usernameText);
-        messageElement.appendChild(usernameElement);
+        default :
+            messageElement.classList.add('chat-message');
+            var avatarElement = document.createElement('i');
+            var avatarText = document.createTextNode(message.sender[0]);
+            avatarElement.appendChild(avatarText);
+            avatarElement.style['background-color'] = getAvatarColor(message.sender);
+
+            messageElement.appendChild(avatarElement);
+
+            var usernameElement = document.createElement('span');
+            var usernameText = document.createTextNode(message.sender);
+            usernameElement.appendChild(usernameText);
+            messageElement.appendChild(usernameElement);
     }
+
 
     var textElement = document.createElement('p');
     var messageText = document.createTextNode(message.content);
@@ -118,6 +152,15 @@ function onMessageReceived(payload) {
 
     messageArea.appendChild(messageElement);
     messageArea.scrollTop = messageArea.scrollHeight;
+}
+
+function disconnectChatRoom() {
+    // 웹소켓 연결을 종료하는 로직을 추가합니다.
+    // 채팅방에 사용자가 모두 나갔을 때 호출됩니다.
+    if (stompClient) {
+        stompClient.disconnect();
+        stompClient = null;
+    }
 }
 
 

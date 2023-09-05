@@ -26,39 +26,4 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.enableSimpleBroker("/topic");
     }
 
-//    @Override
-//    public void configureClientInboundChannel(ChannelRegistration registration) {
-//        registration.interceptors(new ChannelInterceptor() {
-//            @Override
-//            public Message<?> preSend(Message<?> message, MessageChannel channel) {
-//                StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
-//                if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
-//                    // 구독 메시지인 경우, 주제를 동적으로 설정
-//                    String destination = accessor.getDestination();
-//                    if (destination != null && destination.startsWith("/topic/")) {
-//                        String[] parts = destination.split("/");
-//                        if (parts.length == 4) {
-//                            // /inquire/shopName/userId 형식의 주제에서 정보를 추출
-//                            String sellerId = parts[2];
-//                            String userId = parts[3];
-//                            // seller와 user 정보를 현재 세션에 저장
-//                            accessor.getSessionAttributes().put("sellerId", sellerId);
-//                            accessor.getSessionAttributes().put("userId", userId);
-//                        }
-//                    }
-//                }
-//                return message;
-//            }
-//        });
-//    }
-
-//    // WebSocketHandler 에 관한 생성자 추가
-//    private final ChatHandler chatHandler;
-//
-//    @Override
-//    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-//        // endpoint 설정 : /ws/chat
-//        // 이를 통해서 ws://localhost:8080/ws/chat 으로 요청이 들어오면 websocket 통신을 진행합니다.
-//        registry.addHandler(chatHandler, "ws/chat").setAllowedOrigins("*");
-//    }
 }
