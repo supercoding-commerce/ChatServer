@@ -5,6 +5,7 @@ import com.github.chatserver.dto.EnterChatDto;
 import com.github.chatserver.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+//import org.springframework.context.ApplicationContext;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -13,6 +14,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RestController;
 
+
 import java.util.Objects;
 
 @RestController
@@ -20,7 +22,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class ChatController {
     private final ChatRoomService chatRoomService;
-
+    //private final ApplicationContext applicationContext;
     @MessageMapping("/chat.sendMessage/{sellerId}/{productId}/{userId}")
     @SendTo("/topic/{sellerId}/{productId}/{userId}")
     public ChatDto sendMessage(
@@ -29,7 +31,9 @@ public class ChatController {
             @DestinationVariable Long productId,
             @DestinationVariable Long userId
     ){
-            return chatDto;
+        ChatDto newChat = chatRoomService.countMessageTag(chatDto);
+        chatRoomService.publishMessage(newChat);
+        return newChat;
     }
 
     @MessageMapping("/chat.addUser/{sellerId}/{productId}/{userId}")
@@ -45,17 +49,21 @@ public class ChatController {
         headerAccessor.getSessionAttributes().put("userId", userId);
         headerAccessor.getSessionAttributes().put("shopName", enterChatDto.getShopName());
         headerAccessor.getSessionAttributes().put("sellerId", sellerId);
-        headerAccessor.getSessionAttributes().put("chatName", enterChatDto.getChatName());
+        headerAccessor.getSessionAttributes().put("role", enterChatDto.getRole());
         headerAccessor.getSessionAttributes().put("productId", productId);
         String customRoomId = createCustomRoomId(sellerId, productId, userId);
         headerAccessor.getSessionAttributes().put("customRoomId", customRoomId);
-        System.out.println(customRoomId);
+        //applicationContext.getBean(ChatRoomService.class).setCustomRoomId(customRoomId);
 
-        if(Objects.equals(enterChatDto.getChatName(), enterChatDto.getUserName())){
+        if(!customRoomId.equals(enterChatDto.getCustomRoomId()))throw new RuntimeException();
+
+
+        if(Objects.equals(enterChatDto.getRole(), "user")){
             chatRoomService.userJoined(customRoomId, userId);
+            chatRoomService.publishRoom(customRoomId,userId, enterChatDto.getUserName(), sellerId,  enterChatDto.getShopName(), productId );
             System.out.println("22222222222" + enterChatDto.getUserName() + enterChatDto.getType());
             return enterChatDto;
-        }else if(Objects.equals(enterChatDto.getChatName(), enterChatDto.getShopName())){
+        }else if(Objects.equals(enterChatDto.getRole(), "seller")){
             chatRoomService.sellerJoined(customRoomId, sellerId);
             System.out.println("22222222222" + enterChatDto.getShopName() + enterChatDto.getType());
             return enterChatDto;
@@ -64,6 +72,7 @@ public class ChatController {
         return enterChatDto;
 
     }
+
 
     public static String createCustomRoomId(Long sellerId, Long productId, Long userId) {
         // userId, sellerId, productId를 6자리 문자열로 변환

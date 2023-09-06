@@ -7,10 +7,11 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class EnterChatDto {
+public class RoomRmqDto {
     private String customRoomId;
+    private Long sellerId;
     private String shopName;
+    private Long userId;
     private String userName;
-    private String role;
-    private MessageType type;
+    private Long productId;
 }

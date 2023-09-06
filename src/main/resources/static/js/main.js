@@ -2,6 +2,7 @@
 const seller = {sellerId: 1, shopName: "테스트판매자"}
 const user = {userId: 2, userName: "테스트유저"}
 const product = {productId: 1, productName: "테스트상품"}
+const customRoomId = createCustomRoomId(seller.sellerId, product.productId, user.userId)
 
 const usernamePage = document.querySelector('#username-page');
 const chatPage = document.querySelector('#chat-page');
@@ -15,7 +16,7 @@ const userRadio = document.querySelector('#user-radio');
 
 
 let stompClient = null;
-let chatName = null;
+let role = null;
 
 const colors = [
     '#2196F3', '#32c787', '#00BCD4', '#ff5652',
@@ -24,9 +25,9 @@ const colors = [
 
 function connect(event) {
     if (sellerRadio.checked) { // 수정: 판매자 라디오 버튼이 선택된 경우
-        chatName = seller.shopName;
+        role = 'seller';
     } else if (userRadio.checked) { // 수정: 사용자 라디오 버튼이 선택된 경우
-        chatName = user.userName;
+        role = 'user';
     } else {
         alert('Please select a user type.'); // 라디오 버튼이 선택되지 않은 경우 알림 표시
         return;
@@ -50,9 +51,10 @@ function connect(event) {
 
 function onConnected() {
     const message = {
+        customRoomId : customRoomId,
         shopName: seller.shopName,
         userName: user.userName,
-        chatName: chatName, //웹소켓 세션 연결이 브라우저마다 각자 독립적으로 메모리를 다루기 때문에 //role : seller or user
+        role: role, //웹소켓 세션 연결이 브라우저마다 각자 독립적으로 메모리를 다루기 때문에 //role : seller or user
         type: "JOIN"
     }
 
@@ -79,7 +81,8 @@ function sendMessage(event) {
     const messageContent = messageInput.value.trim();
     if(messageContent && stompClient) {
         const chatMessage = {
-            sender: chatName,
+            customRoomId: customRoomId,
+            sender: role === 'user' ? user.userName : seller.shopName,
             content: messageInput.value,
             type: 'CHAT'
         };
@@ -97,15 +100,16 @@ function onMessageReceived(payload) {
     switch (message.type){
         case 'JOIN':
             messageElement.classList.add('event-message');
-            message.content = message.chatName + ' joined!';
+            message.content = (message.role === 'user') ? (message.userName + ' joined!') : (message.shopName + ' joined!');
             break;
 
         case 'LEAVE':
             messageElement.classList.add('event-message');
-            message.content = message.chatName + ' left!';
+            message.content = (message.role === 'user') ? (message.userName + ' left!') : (message.shopName + ' left!');
             break;
 
         case 'TERMINATE':
+            //stompClient.send(`/app/chat.disconnect/${seller.sellerId}/${product.productId}/${user.userId}`);
             disconnectChatRoom();
             break;
 
@@ -152,6 +156,18 @@ function getAvatarColor(messageSender) {
     }
     let index = Math.abs(hash % colors.length);
     return colors[index];
+}
+
+function createCustomRoomId(sellerId, productId, userId) {
+    // userId, sellerId, productId를 6자리 문자열로 변환
+    const userIdStr = String(userId).padStart(6, '0');
+    const sellerIdStr = String(sellerId).padStart(6, '0');
+    const productIdStr = String(productId).padStart(6, '0');
+
+    // customRoomId를 조합
+    const customRoomId = sellerIdStr + productIdStr + userIdStr;
+
+    return customRoomId;
 }
 
 startButton.addEventListener('click', connect, true)

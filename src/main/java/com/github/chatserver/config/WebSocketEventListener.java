@@ -26,43 +26,60 @@ public class WebSocketEventListener {
             SessionDisconnectEvent event
     ) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        String sessionId = headerAccessor.getSessionId();
-        SimpUser user = userRegistry.getUser(sessionId);
-
-
-        String chatName = (String) headerAccessor.getSessionAttributes().get("chatName");
         String shopName = (String) headerAccessor.getSessionAttributes().get("shopName");
         String userName = (String) headerAccessor.getSessionAttributes().get("userName");
         Long userId = (Long) headerAccessor.getSessionAttributes().get("userId");
         Long sellerId = (Long) headerAccessor.getSessionAttributes().get("sellerId");
         Long productId = (Long) headerAccessor.getSessionAttributes().get("productId");
         String customRoomId = (String) headerAccessor.getSessionAttributes().get("customRoomId");
-
-        if (chatName != null) {
-            if (chatName.equals(shopName)) {
+        String role = (String) headerAccessor.getSessionAttributes().get("role");
+        System.out.println("role: " + role);
+        switch(role){
+            case "seller" :
+                System.out.println("switchseller");
                 chatRoomService.sellerLeft(customRoomId, sellerId);
-                log.info("Seller disconnected {}", chatName);
-                var chatMessage = EnterChatDto.builder()
+                log.info("Seller disconnected {}", shopName);
+                var sellerMessage = EnterChatDto.builder()
                         .type(MessageType.LEAVE)
-                        .chatName(chatName)
+                        .userName(userName)
+                        .shopName(shopName)
+                        .role(role)
                         .build();
-                messageTemplate.convertAndSend("/topic/" + sellerId + "/" + productId + "/" + userId, chatMessage);
-            } else if (chatName.equals(userName)) {
+                messageTemplate.convertAndSend("/topic/" + sellerId + "/" + productId + "/" + userId, sellerMessage);
+                break;
+
+            case "user" :
+                System.out.println("switchuser");
                 chatRoomService.userLeft(customRoomId, userId);
-                log.info("User disconnected {}", chatName);
+                log.info("User disconnected {}", userName);
+                var userMessage = EnterChatDto.builder()
+                        .type(MessageType.LEAVE)
+                        .userName(userName)
+                        .shopName(shopName)
+                        .role(role)
+                        .build();
+                messageTemplate.convertAndSend("/topic/" + sellerId + "/" + productId + "/" + userId, userMessage);
+                break;
+
+            default :
+                chatRoomService.userLeft(customRoomId, userId);
+                log.info("User disconnected {}", userName);
                 var chatMessage = EnterChatDto.builder()
                         .type(MessageType.LEAVE)
-                        .chatName(chatName)
+                        .userName(userName)
+                        .shopName(shopName)
+                        .role(role)
                         .build();
                 messageTemplate.convertAndSend("/topic/" + sellerId + "/" + productId + "/" + userId, chatMessage);
-            }
         }
+
 
         if (chatRoomService.isUserChatRoomEmpty(customRoomId) && chatRoomService.isSellerChatRoomEmpty(customRoomId)) {
             log.info("WS gonna be terminated {}", customRoomId);
             var chatMessage = EnterChatDto.builder()
                     .type(MessageType.TERMINATE)
-                    .chatName(chatName)
+                    .userName(null)
+                    .shopName(null)
                     .build();
             messageTemplate.convertAndSend("/topic/" + sellerId + "/" + productId + "/" + userId, chatMessage);
 
