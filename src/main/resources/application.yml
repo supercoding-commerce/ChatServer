@@ -1,5 +1,5 @@
 rabbitmq:
-  host: localhost
+  host: ${RMQ_HOST}
   port: 5672
-  username: guest
-  password: guest
+  username: ${RMQ_USER}
+  password: ${RMQ_PASSWORD}

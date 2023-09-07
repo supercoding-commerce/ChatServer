@@ -1,7 +1,7 @@
 
-const seller = {sellerId: 1, shopName: "테스트판매자"}
-const user = {userId: 2, userName: "테스트유저"}
-const product = {productId: 1, productName: "테스트상품"}
+const seller = {sellerId: 2, shopName: "테스트판매자2"}
+const user = {userId: 3, userName: "테스트유저3"}
+const product = {productId: 4, productName: "테스트상품4"}
 const customRoomId = createCustomRoomId(seller.sellerId, product.productId, user.userId)
 
 const usernamePage = document.querySelector('#username-page');
