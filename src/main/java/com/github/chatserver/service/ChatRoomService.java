@@ -5,7 +5,12 @@ import com.github.chatserver.dto.ChatRmqDto;
 import com.github.chatserver.dto.RoomRmqDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,6 +65,7 @@ public class ChatRoomService {
     }
 
     public void publishRoom(String customRoomId, Long userId, String userName, Long sellerId, String shopName, Long productId) {
+        System.out.println("publishRoom: " + customRoomId);
         RoomRmqDto newRoom = RoomRmqDto.builder()
                 .customRoomId(customRoomId)
                 .userId(userId)
@@ -69,13 +75,6 @@ public class ChatRoomService {
                 .productId(productId)
                 .build();
 
-//        Message message = MessageBuilder
-//                .withBody(newChatRoom)
-//                .setHeader("customRoomId", customRoomId) // customRoomId를 헤더에 추가
-//                .build();
-
-        // RabbitMQ로 메시지 전송
-        //rabbitTemplate.send(RabbitMQConfig.EXCHANGE_NAME, "postChat." + customRoomId, message);
         rabbitTemplate.convertAndSend("exchange", "postRoom", newRoom);
 
     }
@@ -112,6 +111,21 @@ public class ChatRoomService {
         // chatDto를 반환
         return chatDto;
 
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOrigin("*"); // 여기에 허용하려는 Origin을 추가
+        configuration.addAllowedMethod(HttpMethod.GET);
+        configuration.addAllowedMethod(HttpMethod.POST);
+        configuration.addAllowedMethod(HttpMethod.PUT);
+        configuration.addAllowedMethod(HttpMethod.DELETE);
+        configuration.addAllowedHeader("Authorization");
+        configuration.addAllowedHeader("Content-Type");
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
 
