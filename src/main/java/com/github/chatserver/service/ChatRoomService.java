@@ -12,6 +12,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -79,17 +80,19 @@ public class ChatRoomService {
 
     }
 
-    public void publishMessage(ChatDto chatDto) {
+    public ChatRmqDto publishMessage(ChatDto chatDto) {
         ChatRmqDto newChat = ChatRmqDto.builder()
                 .customRoomId(chatDto.getCustomRoomId())
                 .messageTag(chatDto.getMessageTag())
                 .sender(chatDto.getSender())
                 .content(chatDto.getContent())
+                .createdAt(LocalDateTime.now().toString())
                 .build();
 
         int messageTag = chatDto.getMessageTag();
         String routingKey = "postChat" + (messageTag % 5 + 1);
         rabbitTemplate.convertAndSend("exchange", routingKey, newChat);
+        return newChat;
     }
 
     public ChatDto countMessageTag( ChatDto chatDto) {

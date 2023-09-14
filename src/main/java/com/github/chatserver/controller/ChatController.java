@@ -1,6 +1,7 @@
 package com.github.chatserver.controller;
 
 import com.github.chatserver.dto.ChatDto;
+import com.github.chatserver.dto.ChatRmqDto;
 import com.github.chatserver.dto.EnterChatDto;
 import com.github.chatserver.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
@@ -25,15 +26,15 @@ public class ChatController {
     //private final ApplicationContext applicationContext;
     @MessageMapping("/chat.sendMessage/{sellerId}/{productId}/{userId}")
     @SendTo("/topic/{sellerId}/{productId}/{userId}")
-    public ChatDto sendMessage(
+    public ChatRmqDto sendMessage(
             @Payload ChatDto chatDto,
             @DestinationVariable Long sellerId,
             @DestinationVariable Long productId,
             @DestinationVariable Long userId
     ){
         ChatDto newChat = chatRoomService.countMessageTag(chatDto);
-        chatRoomService.publishMessage(newChat);
-        return newChat;
+        return chatRoomService.publishMessage(newChat);
+
     }
 
     @MessageMapping("/chat.addUser/{sellerId}/{productId}/{userId}")
