@@ -8,8 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.messaging.simp.user.SimpUser;
-import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
@@ -17,7 +15,6 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 @RequiredArgsConstructor
 @Slf4j
 public class WebSocketEventListener {
-    private final SimpUserRegistry userRegistry;
     private final SimpMessageSendingOperations messageTemplate;
     private final ChatRoomService chatRoomService;
 
@@ -33,10 +30,9 @@ public class WebSocketEventListener {
         Long productId = (Long) headerAccessor.getSessionAttributes().get("productId");
         String customRoomId = (String) headerAccessor.getSessionAttributes().get("customRoomId");
         String role = (String) headerAccessor.getSessionAttributes().get("role");
-        System.out.println("role: " + role);
+        System.out.println("role left room: " + role);
         switch(role){
             case "seller" :
-                System.out.println("switchseller");
                 chatRoomService.sellerLeft(customRoomId, sellerId);
                 log.info("Seller disconnected {}", shopName);
                 var sellerMessage = EnterChatDto.builder()
@@ -46,19 +42,6 @@ public class WebSocketEventListener {
                         .role(role)
                         .build();
                 messageTemplate.convertAndSend("/topic/" + sellerId + "/" + productId + "/" + userId, sellerMessage);
-                break;
-
-            case "user" :
-                System.out.println("switchuser");
-                chatRoomService.userLeft(customRoomId, userId);
-                log.info("User disconnected {}", userName);
-                var userMessage = EnterChatDto.builder()
-                        .type(MessageType.LEAVE)
-                        .userName(userName)
-                        .shopName(shopName)
-                        .role(role)
-                        .build();
-                messageTemplate.convertAndSend("/topic/" + sellerId + "/" + productId + "/" + userId, userMessage);
                 break;
 
             default :

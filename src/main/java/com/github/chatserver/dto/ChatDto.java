@@ -9,6 +9,5 @@ public class ChatDto {
     private String customRoomId;
     private String sender;//채팅을 보낸 사람
     private String content;// 메세지
-    private Integer messageTag;
 
 }

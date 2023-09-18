@@ -81,55 +81,41 @@ public class ChatRoomService {
     }
 
     public ChatRmqDto publishMessage(ChatDto chatDto) {
+        String createdAt = LocalDateTime.now().toString();
         ChatRmqDto newChat = ChatRmqDto.builder()
                 .customRoomId(chatDto.getCustomRoomId())
-                .messageTag(chatDto.getMessageTag())
                 .sender(chatDto.getSender())
                 .content(chatDto.getContent())
-                .createdAt(LocalDateTime.now().toString())
+                .createdAt(createdAt)
                 .build();
 
-        int messageTag = chatDto.getMessageTag();
-        String routingKey = "postChat" + (messageTag % 5 + 1);
+        int lastDigit = Integer.parseInt(createdAt.substring(createdAt.length() - 1));
+        String routingKey = "postChat" + (lastDigit % 5 + 1);
         rabbitTemplate.convertAndSend("exchange", routingKey, newChat);
         return newChat;
     }
 
-    public ChatDto countMessageTag( ChatDto chatDto) {
-        String customRoomId = chatDto.getCustomRoomId();
+//    public ChatDto countMessageTag( ChatDto chatDto) {
+//        String customRoomId = chatDto.getCustomRoomId();
+//
+//        Integer currentMessageTag =  messageTagCounts.get(customRoomId);
+//
+//        if (currentMessageTag == null) {
+//            currentMessageTag = 1;
+//        } else {
+//            currentMessageTag++;
+//        }
+//        // messageTagCounts 맵에 현재 messageTag 값을 저장
+//        messageTagCounts.put(customRoomId, currentMessageTag);
+//
+//        // chatDto에 업데이트된 messageTag 값을 설정
+//        chatDto.setMessageTag(currentMessageTag);
+//
+//        // chatDto를 반환
+//        return chatDto;
+//
+//    }
 
-        Integer currentMessageTag =  messageTagCounts.get(customRoomId);
-
-        if (currentMessageTag == null) {
-            currentMessageTag = 1;
-        } else {
-            currentMessageTag++;
-        }
-        // messageTagCounts 맵에 현재 messageTag 값을 저장
-        messageTagCounts.put(customRoomId, currentMessageTag);
-
-        // chatDto에 업데이트된 messageTag 값을 설정
-        chatDto.setMessageTag(currentMessageTag);
-
-        // chatDto를 반환
-        return chatDto;
-
-    }
-
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("*"); // 여기에 허용하려는 Origin을 추가
-        configuration.addAllowedMethod(HttpMethod.GET);
-        configuration.addAllowedMethod(HttpMethod.POST);
-        configuration.addAllowedMethod(HttpMethod.PUT);
-        configuration.addAllowedMethod(HttpMethod.DELETE);
-        configuration.addAllowedHeader("Authorization");
-        configuration.addAllowedHeader("Content-Type");
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
 
 
 }

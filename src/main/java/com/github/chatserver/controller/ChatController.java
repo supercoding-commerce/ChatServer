@@ -6,13 +6,11 @@ import com.github.chatserver.dto.EnterChatDto;
 import com.github.chatserver.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-//import org.springframework.context.ApplicationContext;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -23,7 +21,6 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class ChatController {
     private final ChatRoomService chatRoomService;
-    //private final ApplicationContext applicationContext;
     @MessageMapping("/chat.sendMessage/{sellerId}/{productId}/{userId}")
     @SendTo("/topic/{sellerId}/{productId}/{userId}")
     public ChatRmqDto sendMessage(
@@ -32,8 +29,8 @@ public class ChatController {
             @DestinationVariable Long productId,
             @DestinationVariable Long userId
     ){
-        ChatDto newChat = chatRoomService.countMessageTag(chatDto);
-        return chatRoomService.publishMessage(newChat);
+        //ChatDto newChat = chatRoomService.countMessageTag(chatDto);
+        return chatRoomService.publishMessage(chatDto);
 
     }
 
@@ -62,11 +59,11 @@ public class ChatController {
         if(Objects.equals(enterChatDto.getRole(), "user")){
             chatRoomService.userJoined(customRoomId, userId);
             chatRoomService.publishRoom(customRoomId,userId, enterChatDto.getUserName(), sellerId,  enterChatDto.getShopName(), productId );
-            System.out.println("22222222222" + enterChatDto.getUserName() + enterChatDto.getType());
+            log.info("user entered: " + enterChatDto.getUserName() + enterChatDto.getType());
             return enterChatDto;
         }else if(Objects.equals(enterChatDto.getRole(), "seller")){
             chatRoomService.sellerJoined(customRoomId, sellerId);
-            System.out.println("22222222222" + enterChatDto.getShopName() + enterChatDto.getType());
+            log.info("seller entered: " + enterChatDto.getShopName() + enterChatDto.getType());
             return enterChatDto;
         }
 
