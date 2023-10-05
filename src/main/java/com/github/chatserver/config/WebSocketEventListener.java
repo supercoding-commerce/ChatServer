@@ -37,11 +37,11 @@ public class WebSocketEventListener {
                 log.info("Seller disconnected {}", shopName);
                 var sellerMessage = EnterChatDto.builder()
                         .type(MessageType.LEAVE)
-                        .userName(userName)
                         .shopName(shopName)
                         .role(role)
                         .build();
                 messageTemplate.convertAndSend("/topic/" + sellerId + "/" + productId + "/" + userId, sellerMessage);
+
                 break;
 
             default :
@@ -50,7 +50,6 @@ public class WebSocketEventListener {
                 var chatMessage = EnterChatDto.builder()
                         .type(MessageType.LEAVE)
                         .userName(userName)
-                        .shopName(shopName)
                         .role(role)
                         .build();
                 messageTemplate.convertAndSend("/topic/" + sellerId + "/" + productId + "/" + userId, chatMessage);

@@ -51,8 +51,7 @@ public class ChatController {
         headerAccessor.getSessionAttributes().put("productId", productId);
         String customRoomId = createCustomRoomId(sellerId, productId, userId);
         headerAccessor.getSessionAttributes().put("customRoomId", customRoomId);
-        //applicationContext.getBean(ChatRoomService.class).setCustomRoomId(customRoomId);
-
+        
         if(!customRoomId.equals(enterChatDto.getCustomRoomId()))throw new RuntimeException();
 
 
