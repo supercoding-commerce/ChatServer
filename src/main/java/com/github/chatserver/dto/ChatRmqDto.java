@@ -13,5 +13,6 @@ public class ChatRmqDto {
     private String sender;
     private String content;
     private String createdAt;
+    private MessageType type;
 
 }

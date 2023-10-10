@@ -2,6 +2,7 @@ package com.github.chatserver.service;
 
 import com.github.chatserver.dto.ChatDto;
 import com.github.chatserver.dto.ChatRmqDto;
+import com.github.chatserver.dto.MessageType;
 import com.github.chatserver.dto.RoomRmqDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -13,6 +14,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -81,11 +84,12 @@ public class ChatRoomService {
     }
 
     public ChatRmqDto publishMessage(ChatDto chatDto) {
-        String createdAt = LocalDateTime.now().toString();
+        String createdAt = getKoreanTime().toString();
         ChatRmqDto newChat = ChatRmqDto.builder()
                 .customRoomId(chatDto.getCustomRoomId())
                 .sender(chatDto.getSender())
                 .content(chatDto.getContent())
+                .type(MessageType.CHAT)
                 .createdAt(createdAt)
                 .build();
 
@@ -93,6 +97,15 @@ public class ChatRoomService {
         String routingKey = "postChat" + (lastDigit % 5 + 1);
         rabbitTemplate.convertAndSend("exchange", routingKey, newChat);
         return newChat;
+    }
+
+    public LocalDateTime getKoreanTime(){
+        ZoneId koreanZone = ZoneId.of("Asia/Seoul");
+        ZonedDateTime koreanTime = ZonedDateTime.now(koreanZone);
+
+        // Convert it to LocalDateTime
+        return koreanTime.toLocalDateTime();
+
     }
 
 //    public ChatDto countMessageTag( ChatDto chatDto) {
