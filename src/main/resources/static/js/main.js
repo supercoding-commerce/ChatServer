@@ -41,7 +41,7 @@ function connect(event) {
      * SockJS : 웹 소켓을 사용한 실시간 통신의 폴백(fallback)을 제공하는 JavaScript 라이브러리입니다. 주요 목적은 브라우저에서 웹 소켓을 지원하지 않는 경우에도 실시간 통신을 가능하게 하는 것입니다.
      * STOMP(Simple Text Oriented Messaging Protocol): 사실상 요놈이 본체 같습니다. 간단한 텍스트 기반의 메시징 프로토콜로, 메시지 브로커와 클라이언트 간의 통신을 단순화하는 데 사용됩니다. 주로 웹 소켓과 함께 사용되며, 메시지 큐, 채팅 애플리케이션, 실시간 업데이트 등의 시나리오에 적합합니다.
      */
-    const socket = new SockJS('/chat');
+    const socket = new SockJS('http://localhost:8080/chat');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, onConnected, onError);
 
@@ -89,6 +89,8 @@ function sendMessage(event) {
         stompClient.send(`/app/chat.sendMessage/${seller.sellerId}/${product.productId}/${user.userId}`, {}, JSON.stringify(chatMessage));
         messageInput.value = '';
     }
+    // EventSource를 시작
+    listenForServerEvents();
     event.preventDefault();
 }
 
@@ -172,3 +174,20 @@ function createCustomRoomId(sellerId, productId, userId) {
 
 startButton.addEventListener('click', connect, true)
 messageForm.addEventListener('submit', sendMessage, true)
+
+
+function listenForServerEvents() {
+    const eventSource = new EventSource("http://localhost:8081/chat-alarm");
+    console.log('2222222222222')
+    eventSource.onmessage = function(event) {
+        const message = JSON.parse(event.data);
+        // 여기서 메시지를 처리하는 코드를 작성하십시오. 예를 들면 채팅 창에 메시지를 표시하는 등의 작업을 할 수 있습니다.
+        console.log('새로운 채팅 알람: ', message);
+    };
+
+    eventSource.onerror = function(error) {
+        console.error("EventSource failed:", error);
+        eventSource.close();
+    };
+}
+
