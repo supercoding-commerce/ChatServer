@@ -27,10 +27,20 @@ public class ChatController {
             @Payload ChatDto chatDto,
             @DestinationVariable Long sellerId,
             @DestinationVariable Long productId,
-            @DestinationVariable Long userId
+            @DestinationVariable Long userId,
+            SimpMessageHeaderAccessor headerAccessor
     ){
         //ChatDto newChat = chatRoomService.countMessageTag(chatDto);
-        return chatRoomService.publishMessage(chatDto);
+        Long consumerId = (Long) headerAccessor.getSessionAttributes().get("consumerId");
+        if(consumerId == null){
+            String role = "seller";
+            return chatRoomService.publishMessage(chatDto, role, sellerId);
+        }else{
+            String role = isConsumer(userId, consumerId) ? "user" : "seller";
+
+            return chatRoomService.publishMessage(chatDto, role, sellerId);
+        }
+
 
     }
 
@@ -56,6 +66,7 @@ public class ChatController {
 
 
         if(Objects.equals(enterChatDto.getRole(), "user")){
+            headerAccessor.getSessionAttributes().put("consumerId", userId);
             chatRoomService.userJoined(customRoomId, userId);
             chatRoomService.publishRoom(customRoomId,userId, enterChatDto.getUserName(), sellerId,  enterChatDto.getShopName(), productId );
             log.info("user entered: " + enterChatDto.getUserName() + enterChatDto.getType());
@@ -73,13 +84,17 @@ public class ChatController {
 
     public static String createCustomRoomId(Long sellerId, Long productId, Long userId) {
         // userId, sellerId, productId를 6자리 문자열로 변환
-        String userIdStr = String.format("%06d", userId);
-        String sellerIdStr = String.format("%06d", sellerId);
-        String productIdStr = String.format("%06d", productId);
+        String userIdStr = java.lang.String.format("%06d", userId);
+        String sellerIdStr = java.lang.String.format("%06d", sellerId);
+        String productIdStr = java.lang.String.format("%06d", productId);
 
         // customRoomId를 조합
         String customRoomId = sellerIdStr + productIdStr + userIdStr;
 
         return customRoomId;
+    }
+
+    private boolean isConsumer(Long userId, Long consumerId){
+        return Objects.equals(userId, consumerId);
     }
 }

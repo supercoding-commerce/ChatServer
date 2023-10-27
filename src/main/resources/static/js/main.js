@@ -177,7 +177,7 @@ messageForm.addEventListener('submit', sendMessage, true)
 
 
 function listenForServerEvents() {
-    const eventSource = new EventSource("http://localhost:8081/chat-alarm");
+    const eventSource = new EventSource(`http://localhost:8081/chat-alarm/${seller.sellerId}`);
     console.log('2222222222222')
     eventSource.onmessage = function(event) {
         const message = JSON.parse(event.data);

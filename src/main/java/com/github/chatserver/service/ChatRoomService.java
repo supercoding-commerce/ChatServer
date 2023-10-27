@@ -83,10 +83,12 @@ public class ChatRoomService {
 
     }
 
-    public ChatRmqDto publishMessage(ChatDto chatDto) {
+    public ChatRmqDto publishMessage(ChatDto chatDto, String role, Long sellerId) {
         String createdAt = getKoreanTime().toString();
         ChatRmqDto newChat = ChatRmqDto.builder()
                 .customRoomId(chatDto.getCustomRoomId())
+                .role(role)
+                .sellerId(sellerId)
                 .sender(chatDto.getSender())
                 .content(chatDto.getContent())
                 .type(MessageType.CHAT)
