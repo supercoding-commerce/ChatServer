@@ -17,6 +17,7 @@ const userRadio = document.querySelector('#user-radio');
 
 let stompClient = null;
 let role = null;
+let eventSource = null;
 
 const colors = [
     '#2196F3', '#32c787', '#00BCD4', '#ff5652',
@@ -44,6 +45,8 @@ function connect(event) {
     const socket = new SockJS('http://localhost:8080/chat');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, onConnected, onError);
+
+    role === "user" ? listenForUserEvents() : listenForSellerEvents()
 
     event.preventDefault();
 }
@@ -89,9 +92,10 @@ function sendMessage(event) {
         stompClient.send(`/app/chat.sendMessage/${seller.sellerId}/${product.productId}/${user.userId}`, {}, JSON.stringify(chatMessage));
         messageInput.value = '';
     }
-    // EventSource를 시작
-    listenForServerEvents();
+
     event.preventDefault();
+
+
 }
 
 
@@ -128,6 +132,7 @@ function onMessageReceived(payload) {
             const usernameText = document.createTextNode(message.sender);
             usernameElement.appendChild(usernameText);
             messageElement.appendChild(usernameElement);
+
     }
 
 
@@ -176,18 +181,56 @@ startButton.addEventListener('click', connect, true)
 messageForm.addEventListener('submit', sendMessage, true)
 
 
-function listenForServerEvents() {
-    const eventSource = new EventSource(`http://localhost:8081/chat-alarm/${seller.sellerId}`);
-    console.log('2222222222222')
-    eventSource.onmessage = function(event) {
+function listenForUserEvents() {
+
+    const eventSource = new EventSource(
+       `http://43.201.22.31:8081/chat-alarm/user/${customRoomId}`
+        //`http://localhost:8081/chat-alarm/user/${customRoomId}`
+    );
+    console.log('EventSource opened');
+
+    eventSource.addEventListener('sse', function(event) {
         const message = JSON.parse(event.data);
-        // 여기서 메시지를 처리하는 코드를 작성하십시오. 예를 들면 채팅 창에 메시지를 표시하는 등의 작업을 할 수 있습니다.
         console.log('새로운 채팅 알람: ', message);
-    };
+    });
 
     eventSource.onerror = function(error) {
         console.error("EventSource failed:", error);
         eventSource.close();
     };
+
+    window.addEventListener('unload', function() {
+        if (eventSource) {
+            eventSource.close();
+            console.log('EventSource closed');
+        }
+    });
 }
+
+function listenForSellerEvents() {
+
+    const eventSource = new EventSource(
+        `http://43.201.22.31:8081/chat-alarm/seller/${customRoomId}`
+        //`http://localhost:8081/chat-alarm/seller/${customRoomId}`
+    );
+
+    eventSource.addEventListener('sse', function(event) {
+        console.log('New chat alarm:', event.data);
+        const message = JSON.parse(event.data);
+        console.log('새로운 채팅 알람: ', message);
+    });
+
+    eventSource.onerror = function(error) {
+        console.error("EventSource failed:", error);
+        eventSource.close();
+    };
+
+    window.addEventListener('unload', function() {
+        if (eventSource) {
+            eventSource.close();
+            console.log('EventSource closed');
+        }
+    });
+}
+
 
