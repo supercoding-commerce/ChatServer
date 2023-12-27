@@ -185,7 +185,7 @@ function listenForUserEvents() {
 
     const eventSource = new EventSource(
        // `http://43.201.22.31:8081/chat-alarm/user/${seller.sellerId}/${user.userId}`
-        `http://localhost:8081/chat-alarm/user/${seller.sellerId}/${user.userId}`
+        `http://localhost:8081/chat-alarm/user/${customRoomId}`
     );
     console.log('EventSource opened');
 
@@ -211,7 +211,7 @@ function listenForSellerEvents() {
 
     const eventSource = new EventSource(
         // `http://43.201.22.31:8081/chat-alarm/seller/${seller.sellerId}`
-        `http://localhost:8081/chat-alarm/seller/${seller.sellerId}`
+        `http://localhost:8081/chat-alarm/seller/${customRoomId}`
     );
 
     eventSource.addEventListener('sse', function(event) {
