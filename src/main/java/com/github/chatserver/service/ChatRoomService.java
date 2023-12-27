@@ -16,6 +16,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -84,7 +85,9 @@ public class ChatRoomService {
     }
 
     public ChatRmqDto publishMessage(ChatDto chatDto, String role, Long sellerId) {
-        String createdAt = getKoreanTime().toString();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        String createdAt = getKoreanTime().format(formatter);
+        System.out.println(createdAt);
         ChatRmqDto newChat = ChatRmqDto.builder()
                 .customRoomId(chatDto.getCustomRoomId())
                 .role(role)
