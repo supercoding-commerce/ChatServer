@@ -184,8 +184,8 @@ messageForm.addEventListener('submit', sendMessage, true)
 function listenForUserEvents() {
 
     const eventSource = new EventSource(
-       `http://43.201.22.31:8081/chat-alarm/user/${customRoomId}`
-        //`http://localhost:8081/chat-alarm/user/${customRoomId}`
+       // `http://43.201.22.31:8081/chat-alarm/user/${seller.sellerId}/${user.userId}`
+        `http://localhost:8081/chat-alarm/user/${seller.sellerId}/${user.userId}`
     );
     console.log('EventSource opened');
 
@@ -210,8 +210,8 @@ function listenForUserEvents() {
 function listenForSellerEvents() {
 
     const eventSource = new EventSource(
-        `http://43.201.22.31:8081/chat-alarm/seller/${customRoomId}`
-        //`http://localhost:8081/chat-alarm/seller/${customRoomId}`
+        // `http://43.201.22.31:8081/chat-alarm/seller/${seller.sellerId}`
+        `http://localhost:8081/chat-alarm/seller/${seller.sellerId}`
     );
 
     eventSource.addEventListener('sse', function(event) {
